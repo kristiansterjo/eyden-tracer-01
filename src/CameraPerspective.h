@@ -6,8 +6,6 @@
 #include "ICamera.h"
 #include <math.h>
 
-// Helpful cotang function
-double cotan(double i) { return(1 / tan(i)); }
 
 /**
  * @brief Perspective Camera class
@@ -43,7 +41,7 @@ public:
 		//Knowing this, the focus will be the cotangent of the half of the angle
 		//Also getting the angle in degrees by dividing pi by 180
 		m_focus = (float)1/tan ((angle/2) * (Pif / 180));
-		
+
 		m_aspect =  (float) resolution.width / resolution.height;
 
 		
