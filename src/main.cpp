@@ -1,4 +1,5 @@
-//Kristian Sterjo & Albrit Bendo
+// //Kristian Sterjo & Albrit Bendo
+
 #include "CameraPerspective.h"
 
 #include "Prim.h"
@@ -10,47 +11,49 @@ Mat RenderFrame(ICamera& camera)
 {
 	// scene objects
 	
-	CPrimSphere s1(RGB(1,0,0.4),Vec3f(-2, 1.7f, 0), 2);
-	CPrimSphere s2(RGB(0.2,0.6,0.3),Vec3f(1, -1, 1), 2.2f);
-	CPrimSphere s3(RGB(0.5,1,0),Vec3f(3, 0.8f, -2), 2);
-	CPrimPlane p1(RGB(0.5,0.3,1),Vec3f(0, -1, 0), Vec3f(0, 1, 0));
+	CPrimSphere s1(RGB(1, 0, 0), Vec3f(-2, 1.7f, 0), 2);
+	CPrimSphere s2(RGB(0, 1, 0), Vec3f(1, -1, 1), 2.2f);
+	CPrimSphere s3(RGB(0, 0, 1), Vec3f(3, 0.8f, -2), 2);
 	
-	CPrimTriangle t1(RGB(0.5,0.5,0.4),Vec3f(-2, 3.7f, 0), Vec3f(1, 2, 1), Vec3f(3, 2.8f, -2));
-	CPrimTriangle t2(RGB(0.7,0.8,0.3),Vec3f(3, 2, 3), Vec3f(3, 2, -3), Vec3f(-3, 2, -3));
+	CPrimPlane p1(RGB(1, 1, 0), Vec3f(0, -1, 0), Vec3f(0, 1, 0));
 	
-	std::vector<Cprim*> primitives = {&s1,&s2,&s3,&p1,&t1,&t2};
+	CPrimTriangle t1(RGB(0, 1, 1), Vec3f(-2, 3.7f, 0), Vec3f(1, 2, 1), Vec3f(3, 2.8f, -2));
+	CPrimTriangle t2(RGB(1, 1, 1), Vec3f(3, 2, 3), Vec3f(3, 2, -3), Vec3f(-3, 2, -3));
 
+	//Here creating the array of geometric objects for raytracing
+	std::vector<CPrim*> primitives = {&p1, &t1, &t2, &s1, &s2, &s3};
+	
 	Mat img(camera.getResolution(), CV_32FC3); 	// image array
 	Ray ray;                            		// primary ray
 	
-	for(int y = 0; y< img.rows; y++)
+	for(int y = 0; y < img.rows; y++)
 		for (int x = 0; x < img.cols; x++) {
 			
 			// Initialize your ray here
-			if(!camera.InitRay(x,y,ray)){
+			if(!camera.InitRay(x, y, ray)){
 				continue;
 			}
 			
-			// Your code
-			
 			Vec3f col = RGB(0, 0, 0); // background color
-			
+
 			/*
 			 * Find closest intersection with scene
 			 * objetcs and calculate color
 			 */
-			
-			// Your code
-			vector<Cprim*>::iterator it;
-			for(it = primitives.begin();it!=primitives.end();it++){
-				if(*it->Intersect(ray)){
-					//if the ray successfully intersects the respective color is gained
-					col = primitives->getColor();
 
+			 // Your code
+			//Iterating through all primitives
+			//and if the ray successfully intersects, it 
+			//gets the color of the correspondent pixel 
+			for(CPrim* iter : primitives)
+			{
+				if(iter->Intersect(ray))
+				{
+					col = iter->getColor();
 				}
 			}
-
-			img.at<Vec3f>(y, x) = col;
+			
+			img.at<Vec3f>(y, x) = col; // store pixel color
 		}
 	
 	img.convertTo(img, CV_8UC3, 255);

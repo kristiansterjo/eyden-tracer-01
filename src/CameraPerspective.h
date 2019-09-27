@@ -1,9 +1,13 @@
-//Kristian Sterjo & Albrit Bendo
-// Perspective Camera class
-// Written by Sergey Kosov in 2005 for Rendering Competition
+// //Kristian Sterjo & Albrit Bendo
+
+
 #pragma once
 
 #include "ICamera.h"
+#include <math.h>
+
+// Helpful cotang function
+double cotan(double i) { return(1 / tan(i)); }
 
 /**
  * @brief Perspective Camera class
@@ -22,43 +26,49 @@ public:
 	CCameraPerspective(Vec3f pos, Vec3f dir, Vec3f up, float angle, Size resolution)
 		: ICamera(resolution)
 		, m_pos(pos)
-		, m_dir(dir)
 		, m_up(up)
-	{
+	{	
+
 		// --- PUT YOUR CODE HERE ---
+
+		m_dir = normalize(dir);	
+
+		//yAxis is the same vector as up but in the inverted direction
+		m_yAxis = (-1)*m_up;
+
+		//From the right hand rule the xaxis is the cross product of up and focus direction
+		m_xAxis = m_dir.cross(m_up);
+
+		//The situation is best represented by an isoscele rectangular triangle just as in the theoretical hw
+		//Knowing this, the focus will be the cotangent of the half of the angle
+		//Also getting the angle in degrees by dividing pi by 180
+		m_focus = (float)1/tan ((angle/2) * (Pif / 180));
 		
+		m_aspect =  (float) resolution.width / resolution.height;
 
-
-		m_zAxis = dir;
-		m_yAxis = -m_up;
-		//y axis is the up vector inverted
-		m_xAxis = m_zAxis.cross(m_up);
-		//from the right hand rule the x axis is the
-		//cross product of the up vector and zaxis
-		m_yAxis = m_zAxis.cross(m_xAxis);
-
-		//getting the norm values
-		m_xAxis = normalize(m_xAxis);
-		m_yAxis = normalize(m_zAxis);
-		m_zAxis = normalize(m_zAxis);
-
-		m_aspect = (float) resolution.width / resolution.height;
-		//now the application of the theoretical homework
-		m_focus = 1.0 / tan(angle/2 * Pif / 180);
-
+		
+						
 	}
 	virtual ~CCameraPerspective(void) = default;
 
 	virtual bool InitRay(float x, float y, Ray& ray) override
 	{
 		// --- PUT YOUR CODE HERE ---
-		float sscx = (2 * ( (x + 0.5)/ getResolution().width))-1 ;
-		float sscy = (2 * ( (y + 0.5)/ getResolution().height))-1 ;
+
+
+		//Applying the code given in the slides
+		float ndcx = (x + 0.5) / getResolution().width;  
+		float ndcy = (y + 0.5) / getResolution().height;
+		float sscx = (2 * ndcx - 1) * m_aspect;  
+		float sscy = (2 * ndcy - 1);
 
 		ray.org = m_pos;
-		//calculating the sum of all vectors in order to find ray.dir
-		ray.dir = normalize (m_aspect * sscx * m_xAxis + sscy * m_yAxis + m_focus*m_dir);
-		ray.t = std::numeric_limits<float>::max();
+		ray.dir =  m_dir * m_focus + sscx * m_xAxis + sscy * m_yAxis;
+		
+		
+		//Here the numeric_limits<float>::max() function should be put 
+		//but I was facing problems with it so I put it manually
+		ray.t   = 340282e+38;
 
 		return true;
 	}
@@ -77,8 +87,4 @@ private:
 	Vec3f m_zAxis;
 	float m_aspect;
 };
-Perspective Camera class
-Written by Sergey Kosov in 2005 for Rendering Competition
-Perspective Camera class
-Written by Sergey Kosov in 2005 for Rendering Competition
 
