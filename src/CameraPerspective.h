@@ -1,3 +1,4 @@
+//Kristian Sterjo & Albrit Bendo
 // Perspective Camera class
 // Written by Sergey Kosov in 2005 for Rendering Competition
 #pragma once
@@ -25,12 +26,40 @@ public:
 		, m_up(up)
 	{
 		// --- PUT YOUR CODE HERE ---
+		
+
+
+		m_zAxis = dir;
+		m_yAxis = -m_up;
+		//y axis is the up vector inverted
+		m_xAxis = m_zAxis.cross(m_up);
+		//from the right hand rule the x axis is the
+		//cross product of the up vector and zaxis
+		m_yAxis = m_zAxis.cross(m_xAxis);
+
+		//getting the norm values
+		m_xAxis = normalize(m_xAxis);
+		m_yAxis = normalize(m_zAxis);
+		m_zAxis = normalize(m_zAxis);
+
+		m_aspect = (float) resolution.width / resolution.height;
+		//now the application of the theoretical homework
+		m_focus = 1.0 / tan(angle/2 * Pif / 180);
+
 	}
 	virtual ~CCameraPerspective(void) = default;
 
 	virtual bool InitRay(float x, float y, Ray& ray) override
 	{
 		// --- PUT YOUR CODE HERE ---
+		float sscx = (2 * ( (x + 0.5)/ getResolution().width))-1 ;
+		float sscy = (2 * ( (y + 0.5)/ getResolution().height))-1 ;
+
+		ray.org = m_pos;
+		//calculating the sum of all vectors in order to find ray.dir
+		ray.dir = normalize (m_aspect * sscx * m_xAxis + sscy * m_yAxis + m_focus*m_dir);
+		ray.t = std::numeric_limits<float>::max();
+
 		return true;
 	}
 
@@ -48,4 +77,8 @@ private:
 	Vec3f m_zAxis;
 	float m_aspect;
 };
+Perspective Camera class
+Written by Sergey Kosov in 2005 for Rendering Competition
+Perspective Camera class
+Written by Sergey Kosov in 2005 for Rendering Competition
 

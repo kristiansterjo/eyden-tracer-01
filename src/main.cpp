@@ -1,5 +1,7 @@
+//Kristian Sterjo & Albrit Bendo
 #include "CameraPerspective.h"
 
+#include "Prim.h"
 #include "PrimSphere.h"
 #include "PrimPlane.h"
 #include "PrimTriangle.h"
@@ -8,14 +10,16 @@ Mat RenderFrame(ICamera& camera)
 {
 	// scene objects
 	
-	CPrimSphere s1(Vec3f(-2, 1.7f, 0), 2);
-	CPrimSphere s2(Vec3f(1, -1, 1), 2.2f);
-	CPrimSphere s3(Vec3f(3, 0.8f, -2), 2);
-	CPrimPlane p1(Vec3f(0, -1, 0), Vec3f(0, 1, 0));
+	CPrimSphere s1(RGB(1,0,0.4),Vec3f(-2, 1.7f, 0), 2);
+	CPrimSphere s2(RGB(0.2,0.6,0.3),Vec3f(1, -1, 1), 2.2f);
+	CPrimSphere s3(RGB(0.5,1,0),Vec3f(3, 0.8f, -2), 2);
+	CPrimPlane p1(RGB(0.5,0.3,1),Vec3f(0, -1, 0), Vec3f(0, 1, 0));
 	
-	CPrimTriangle t1(Vec3f(-2, 3.7f, 0), Vec3f(1, 2, 1), Vec3f(3, 2.8f, -2));
-	CPrimTriangle t2(Vec3f(3, 2, 3), Vec3f(3, 2, -3), Vec3f(-3, 2, -3));
+	CPrimTriangle t1(RGB(0.5,0.5,0.4),Vec3f(-2, 3.7f, 0), Vec3f(1, 2, 1), Vec3f(3, 2.8f, -2));
+	CPrimTriangle t2(RGB(0.7,0.8,0.3),Vec3f(3, 2, 3), Vec3f(3, 2, -3), Vec3f(-3, 2, -3));
 	
+	std::vector<Cprim*> primitives = {&s1,&s2,&s3,&p1,&t1,&t2};
+
 	Mat img(camera.getResolution(), CV_32FC3); 	// image array
 	Ray ray;                            		// primary ray
 	
@@ -23,6 +27,9 @@ Mat RenderFrame(ICamera& camera)
 		for (int x = 0; x < img.cols; x++) {
 			
 			// Initialize your ray here
+			if(!camera.InitRay(x,y,ray)){
+				continue;
+			}
 			
 			// Your code
 			
@@ -34,8 +41,16 @@ Mat RenderFrame(ICamera& camera)
 			 */
 			
 			// Your code
-			
-			img.at<Vec3f>(y, x) = col; // store pixel color
+			vector<Cprim*>::iterator it;
+			for(it = primitives.begin();it!=primitives.end();it++){
+				if(*it->Intersect(ray)){
+					//if the ray successfully intersects the respective color is gained
+					col = primitives->getColor();
+
+				}
+			}
+
+			img.at<Vec3f>(y, x) = col;
 		}
 	
 	img.convertTo(img, CV_8UC3, 255);
